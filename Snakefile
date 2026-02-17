@@ -55,4 +55,14 @@ rule kallisto_on_reads:
         '''
         kallisto quant -i index.idx -o {output.quant_reads} -b 10 -t 2 {input.r1} {input.r2}
         '''
+
+rule cleanup:
+    shell:
+        '''
+        rm -r quant_reads
+        rm -r data
+        rm index.idx
+        rm ncbi_dataset.zip
+        rm PipelineReport.txt
+        '''
     
