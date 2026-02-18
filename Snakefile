@@ -3,8 +3,8 @@ samples = ["SRR5660030","SRR5660033","SRR5660044","SRR5660045"]
 
 rule all:
     input:
-        quant_reads = expand("quant_reads/{sample}",sample=samples),
-        outfile_report= "PipelineReport.txt"
+        outfile_report= "PipelineReport.txt",
+        sleuth_done = "sleuth_check.txt"
 
 rule fetch_index:
     output:
@@ -30,7 +30,7 @@ rule clean_cds:
         outfile_report= "PipelineReport.txt"
     shell:
         '''
-        sed '/^>/s/ .*//' data/cds_from_genomic.fna | sed 's/>.*cds_/>/g' > data/cds_clean.fna
+        sed '/^>/s/ .*//' {input.cds} | sed 's/>.*cds_/>/g' > data/cds_clean.fna
         echo "The HCMV genome (GCF_000845245.1) has $(wc -l {output.clean_cds} | awk '{{print $1}}') CDs" >> {output.outfile_report}
         '''
 
@@ -46,14 +46,26 @@ rule build_index:
 
 rule kallisto_on_reads:
     input: 
-        r1="reads/{sample}/{sample}_1.fastq",
-        r2="reads/{sample}/{sample}_2.fastq",
+        r1="sample_data/{sample}/{sample}_1.fastq",
+        r2="sample_data/{sample}/{sample}_2.fastq",
         ref_index= "index.idx"
     output:
         quant_reads = directory("quant_reads/{sample}")
     shell:
         '''
-        kallisto quant -i index.idx -o {output.quant_reads} -b 10 -t 2 {input.r1} {input.r2}
+        kallisto quant -i {input.ref_index} -o {output.quant_reads} -b 10 -t 2 {input.r1} {input.r2}
+        '''
+
+rule sleuth:
+    input:
+        quant_reads = expand("quant_reads/{sample}",sample=samples),
+    output:
+        sleuth_done = "sleuth_check.txt"
+    shell:
+        '''
+        Rscript sleuth_script.R 
+        touch {output.sleuth_done}
+        cat sleuth_out.txt >> PipelineReport.txt
         '''
 
 rule cleanup:
@@ -64,5 +76,6 @@ rule cleanup:
         rm index.idx
         rm ncbi_dataset.zip
         rm PipelineReport.txt
+        rm sleuth_out.txt
+        rm sleuth_check.txt
         '''
-    
