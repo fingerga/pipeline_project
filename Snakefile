@@ -34,6 +34,7 @@ rule clean_cds:
         '''
         sed '/^>/s/ .*//' {input.cds} | sed 's/>.*cds_/>/g' > data/cds_clean.fna
         echo "The HCMV genome (GCF_000845245.1) has $(wc -l {output.clean_cds} | awk '{{print $1}}') CDs" >> {output.outfile_report}
+        printf "\n" >> {output.outfile_report}
         '''
 
 rule build_index:
@@ -68,6 +69,7 @@ rule sleuth:
         Rscript sleuth_script.R 
         touch {output.sleuth_done}
         cat sleuth_out.txt >> PipelineReport.txt
+        printf "\n" >> PipelineReport.txt
         '''
 
 rule cleanup:
@@ -121,11 +123,13 @@ rule bowtie_run:
     input:
         r1="sample_data/{sample}/{sample}_1.fastq",
         r2="sample_data/{sample}/{sample}_2.fastq",
-        ref_index_gen= touch("bowtiebuild.done")
+        ref_index_gen= touch("bowtiebuild.done"),
+        sleuth_done = "sleuth_check.txt"
     output:
         mapped1 = "mapped_reads/{sample}/{sample}.1.fastq",
         mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
     shell:
         '''
         bowtie2 -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
+        echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> PipelineReport.txt
         '''
