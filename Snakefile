@@ -5,8 +5,7 @@ rule all:
     input:
         outfile_report= "PipelineReport.txt",
         sleuth_done = "sleuth_check.txt",
-        mapped1 = expand("mapped_reads/{sample}/{sample}.1.fastq", sample= samples),
-        mapped2 = expand("mapped_reads/{sample}/{sample}.2.fastq", sample= samples)
+        assembled_gen= expand("assemblies/{sample}_assembly/", sample=samples)
 
 rule fetch_index:
     output:
@@ -133,3 +132,21 @@ rule bowtie_run:
         bowtie2 -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
         echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> PipelineReport.txt
         '''
+
+rule spades:
+    input:
+        mapped1 = "mapped_reads/{sample}/{sample}.1.fastq",
+        mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
+    output:
+        assembled_gen= directory("assemblies/{sample}_assembly/")
+    shell:
+        '''
+        spades.py -k 127 -t 2 --only-assembler -1 {input.mapped1} -2 {input.mapped2} -o {output.assembled_gen}
+        '''
+
+#to do:
+    #rule blast: extract longest contig, using SeqIO probably, and use a os.system call to blast, immediately >> to report file
+    #rule remove_excess: remove extra files that aren't needed, keep: data, assemblies, mapped_reads, quant_reads
+    #write comments
+    #write README file/documentation
+    #run with full sample files and SAVE REPORT
