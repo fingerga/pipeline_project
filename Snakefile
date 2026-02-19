@@ -21,6 +21,7 @@ rule unzip_index:
     shell:
         '''
         unzip -p {input.outfile_zip} > {output.cds}
+        rm ncbi_dataset.zip
         '''
 
 rule clean_cds:
@@ -69,6 +70,7 @@ rule sleuth:
         touch {output.sleuth_done}
         cat sleuth_out.txt >> PipelineReport.txt
         printf "\n" >> PipelineReport.txt
+        rm sleuth_out.txt
         '''
 
 rule cleanup:
@@ -77,15 +79,10 @@ rule cleanup:
         rm -r quant_reads
         rm -r data
         rm index.idx
-        rm ncbi_dataset.zip
         rm PipelineReport.txt
-        rm sleuth_out.txt
-        rm sleuth_check.txt
         rm -r mapped_reads
-        rm ncbi_dataset_gen.zip
-        rm bowtiebuild.done
         rm -r ref_gen
-        rm dummy.sam
+        rm -r assemblies
         '''
 
 rule fetch_index_gen:
@@ -105,6 +102,7 @@ rule unzip_index_gen:
         sed -n '/^>/,$p' {output.ref_genome} | sed '/^{{/,$d' > genometemp.fasta
         cat genometemp.fasta > {output.ref_genome}
         rm genometemp.fasta
+        rm ncbi_dataset_gen.zip
         '''
 
 rule bowtie_build:
@@ -129,8 +127,9 @@ rule bowtie_run:
         mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
     shell:
         '''
-        bowtie2 -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
+        bowtie2 --quiet -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
         echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> PipelineReport.txt
+        rm dummy.sam
         '''
 
 rule spades:
@@ -142,6 +141,8 @@ rule spades:
     shell:
         '''
         spades.py -k 127 -t 2 --only-assembler -1 {input.mapped1} -2 {input.mapped2} -o {output.assembled_gen}
+        rm bowtiebuild.done
+        rm sleuth_check.txt
         '''
 
 #to do:
