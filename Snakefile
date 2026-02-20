@@ -5,7 +5,7 @@ rule all:
     input:
         outfile_report= "PipelineReport.txt",
         sleuth_done = "sleuth_check.txt",
-        blast_result= expand("blast_out/{sample}_out.txt", sample=samples)
+        donecheck= expand("pipeline{sample}.done", sample= samples)
 
 rule fetch_index:
     output:
@@ -127,18 +127,20 @@ rule bowtie_run:
         sleuth_done = "sleuth_check.txt"
     output:
         mapped1 = "mapped_reads/{sample}/{sample}.1.fastq",
-        mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
+        mapped2 = "mapped_reads/{sample}/{sample}.2.fastq",
+        bowtie_map= "mapped_reads/{sample}/{sample}_out.txt",
     shell:
         '''
         bowtie2 --quiet -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
-        echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> PipelineReport.txt
+        echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> {output.bowtie_map}
         rm dummy.sam
+        cat {output.bowtie_map} >> PipelineReport.txt
         '''
 
 rule spades:
     input:
         mapped1 = "mapped_reads/{sample}/{sample}.1.fastq",
-        mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
+        mapped2 = "mapped_reads/{sample}/{sample}.2.fastq",
     output:
         assembled_gen= directory("assemblies/{sample}_assembly/"),
     shell:
@@ -175,20 +177,40 @@ rule build_blast:
         '''
         makeblastdb -in {input.blast_genome} -out {output.blast_db}/betaherpesvirinae -title betaherpesvirinae -dbtype nucl
         '''
+rule longest_contig:
+    input:
+        assembled_gen= directory("assemblies/{sample}_assembly")
+    output:
+        longest_contig = ("assemblies/{sample}_lc.fasta")
+    shell:
+        '''
+        python blast_assembly.py -i {input.assembled_gen}/scaffolds.fasta -o {output.longest_contig}
+        '''
 
 rule run_blast:
     input:
-        assembled_gen= directory("assemblies/{sample}_assembly/"),
+        longest_contig = ("assemblies/{sample}_lc.fasta"),
         blast_db = directory("blast_db/")
     output:
-        blast_out= "blast_out/{sample}_out.txt"
+        blast_out= "blast_out/{sample}"
     shell:
         '''
-        python blast_assembly.py -i {input.assembled_gen} -i {input.blast_db} -o {output.blast_out}
-        printf "\n" >> PipelineReport.txt
-        cat {output.blast_out} >> PipelineReport.txt
+        blastn -query {input.longest_contig} -db {input.blast_db}/betaherpesvirinae -max_hsps 1 -out {output.blast_out} -outfmt "6 sacc pident length qstart qend sstart send bitscore evalue stitle"
         '''
 
+
+rule add_blast:
+    input: 
+        blast_out= "blast_out/{sample}"
+    output:
+        donecheck= touch('pipeline{sample}.done')
+    shell:
+        '''
+        printf "\n" >> PipelineReport.txt
+        echo "{wildcards.sample}:" >> PipelineReport.txt
+        echo "sacc  pident  length  qstart  qend    sstart  send    bitscore    evalue  stitle" >> PipelineReport.txt
+        head -n 5 {input.blast_out} >> PipelineReport.txt
+        '''
 
 #to do:
     #rule blast: call py file that extracts longest contig, using SeqIO probably, and uses a os.system call to blast, immediately >> to report file
