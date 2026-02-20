@@ -47,8 +47,8 @@ rule build_index:
 
 rule kallisto_on_reads:
     input: 
-        r1="sample_data/{sample}/{sample}_1.fastq",
-        r2="sample_data/{sample}/{sample}_2.fastq",
+        r1="reads/{sample}/{sample}_1.fastq",
+        r2="reads/{sample}/{sample}_2.fastq",
         ref_index= "index.idx"
     output:
         quant_reads = directory("quant_reads/{sample}")
@@ -103,8 +103,8 @@ rule bowtie_build:
 
 rule bowtie_run:
     input:
-        r1="sample_data/{sample}/{sample}_1.fastq",
-        r2="sample_data/{sample}/{sample}_2.fastq",
+        r1="reads/{sample}/{sample}_1.fastq",
+        r2="reads/{sample}/{sample}_2.fastq",
         ref_index_gen= touch("bowtiebuild.done"),
         sleuth_report = "sleuthReport.txt"
     output:
@@ -113,9 +113,8 @@ rule bowtie_run:
         bowtie_report= "mapped_reads/{sample}/{sample}_report.txt",
     shell:
         '''
-        bowtie2 --quiet -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S dummy.sam
+        bowtie2 --quiet -x ref_gen/ref -1 {input.r1} -2 {input.r2} --al-conc mapped_reads/{wildcards.sample}/{wildcards.sample}.%.fastq -S {wildcards.sample}.sam
         echo "Sample {wildcards.sample} had $(echo $(wc -l < {input.r1}) / 4 | bc) read pairs before and $(echo $(wc -l < {output.mapped1}) / 4 | bc) read pairs after Bowtie2 filtering." >> {output.bowtie_report}
-        rm dummy.sam
         '''
 
 rule spades:
@@ -197,7 +196,7 @@ rule write_report:
             sample=$(basename $file)
             echo "$sample:" >> {output.final_out}
             echo "sacc\tpident\tlength\tqstart\tqend\tsstart\tsend\tbitscore\tevalue\tstitle" >> {output.final_out}
-            cat $file >> {output.final_out}
+            head -n 5 $file >> {output.final_out}
             echo "" >> {output.final_out}
         done
         '''
@@ -219,8 +218,6 @@ rule cleanup:
         rm -r blast_out
         '''
 #to do:
-    #rule blast: call py file that extracts longest contig, using SeqIO probably, and uses a os.system call to blast, immediately >> to report file
-    #rule remove_excess: remove extra files that aren't needed, keep: data, assemblies, mapped_reads, quant_reads
     #write comments
     #write README file/documentation
     #run with full sample files and SAVE REPORT

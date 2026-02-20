@@ -10,7 +10,6 @@ sleuth_table <- data.frame(
   ),
   stringsAsFactors = FALSE
 )
-#stab = read.table(input_file,header=TRUE)
 so = sleuth_prep(sleuth_table)
 so = sleuth_fit(so, ~condition, 'full')
 so = sleuth_fit(so, ~1, 'reduced')
