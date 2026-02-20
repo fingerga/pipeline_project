@@ -5,7 +5,7 @@ rule all:
     input:
         outfile_report= "PipelineReport.txt",
         sleuth_done = "sleuth_check.txt",
-        assembled_gen= expand("assemblies/{sample}_assembly/", sample=samples)
+        blast_result= expand("blast_out/{sample}_out.txt", sample=samples)
 
 rule fetch_index:
     output:
@@ -83,6 +83,9 @@ rule cleanup:
         rm -r mapped_reads
         rm -r ref_gen
         rm -r assemblies
+        rm -r blast_db
+        rm bowtiebuild.done
+        rm sleuth_check.txt
         '''
 
 rule fetch_index_gen:
@@ -137,16 +140,58 @@ rule spades:
         mapped1 = "mapped_reads/{sample}/{sample}.1.fastq",
         mapped2 = "mapped_reads/{sample}/{sample}.2.fastq"
     output:
-        assembled_gen= directory("assemblies/{sample}_assembly/")
+        assembled_gen= directory("assemblies/{sample}_assembly/"),
     shell:
         '''
         spades.py -k 127 -t 2 --only-assembler -1 {input.mapped1} -2 {input.mapped2} -o {output.assembled_gen}
-        rm bowtiebuild.done
-        rm sleuth_check.txt
         '''
 
+rule fetch_blast:
+    output:
+        outfile_blast= "ncbi_dataset_blast.zip"
+    shell:
+        "datasets download virus genome taxon betaherpesvirinae --refseq --include genome --filename {output.outfile_blast}"
+
+rule unzip_blast:
+    input:
+        outfile_blast= "ncbi_dataset_blast.zip"
+    output:
+        blast_genome= "data/blastdb.fasta"
+    shell:
+        '''
+        unzip -p {input.outfile_blast}  > {output.blast_genome}
+        sed -n '/^>/,$p' {output.blast_genome} | sed '/^The NCBI Datasets Project/,$d' > tempdb.fasta
+        cat tempdb.fasta > {output.blast_genome}
+        rm tempdb.fasta
+        rm ncbi_dataset_blast.zip
+        '''
+
+rule build_blast:
+    input:
+        blast_genome= "data/blastdb.fasta"
+    output:
+        blast_db = directory("blast_db/")
+    shell:
+        '''
+        makeblastdb -in {input.blast_genome} -out {output.blast_db}/betaherpesvirinae -title betaherpesvirinae -dbtype nucl
+        '''
+
+rule run_blast:
+    input:
+        assembled_gen= directory("assemblies/{sample}_assembly/"),
+        blast_db = directory("blast_db/")
+    output:
+        blast_out= "blast_out/{sample}_out.txt"
+    shell:
+        '''
+        python blast_assembly.py -i {input.assembled_gen} -i {input.blast_db} -o {output.blast_out}
+        printf "\n" >> PipelineReport.txt
+        cat {output.blast_out} >> PipelineReport.txt
+        '''
+
+
 #to do:
-    #rule blast: extract longest contig, using SeqIO probably, and use a os.system call to blast, immediately >> to report file
+    #rule blast: call py file that extracts longest contig, using SeqIO probably, and uses a os.system call to blast, immediately >> to report file
     #rule remove_excess: remove extra files that aren't needed, keep: data, assemblies, mapped_reads, quant_reads
     #write comments
     #write README file/documentation
