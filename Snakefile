@@ -1,5 +1,5 @@
-index_accession = "GCF_000845245.1"
-samples = ["SRR5660030","SRR5660033","SRR5660044","SRR5660045"]
+index_accession = "GCF_000845245.1" #accession number for HCMV reference
+samples = ["SRR5660030","SRR5660033","SRR5660044","SRR5660045"] #list of input SRA accession numbers
 
 rule all:
     #making the report file my final output
@@ -257,15 +257,10 @@ rule cleanup:
         rm -r ref_gen
         rm -r assemblies
         rm -r blast_db
-        rm bowtiebuild.done
         rm sleuthReport.txt
         rm cdsReport.txt
         rm -r blast_out
         rm *.sam
         '''
 #to do:
-    #ask Dr Wheeler: 
-        #do we build the refseq database for BLAST? or all sequences in that family?
-        #should we clear extra files made during the pipeline after we run it? or is it ok to leave them?
-    #write comments
     #write README file/documentation
