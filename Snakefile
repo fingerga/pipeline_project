@@ -47,8 +47,8 @@ rule build_index:
 
 rule kallisto_on_reads:
     input: 
-        r1="reads/{sample}/{sample}_1.fastq",
-        r2="reads/{sample}/{sample}_2.fastq",
+        r1="sample_data/{sample}/{sample}_1.fastq",
+        r2="sample_data/{sample}/{sample}_2.fastq",
         ref_index= "index.idx"
     output:
         quant_reads = directory("quant_reads/{sample}")
@@ -103,8 +103,8 @@ rule bowtie_build:
 
 rule bowtie_run:
     input:
-        r1="reads/{sample}/{sample}_1.fastq",
-        r2="reads/{sample}/{sample}_2.fastq",
+        r1="sample_data/{sample}/{sample}_1.fastq",
+        r2="sample_data/{sample}/{sample}_2.fastq",
         ref_index_gen= touch("bowtiebuild.done"),
         sleuth_report = "sleuthReport.txt"
     output:
@@ -132,7 +132,7 @@ rule fetch_blast:
     output:
         outfile_blast= "ncbi_dataset_blast.zip"
     shell:
-        "datasets download virus genome taxon betaherpesvirinae --refseq --include genome --filename {output.outfile_blast}"
+        "datasets download virus genome taxon betaherpesvirinae --include genome --filename {output.outfile_blast}"
 
 rule unzip_blast:
     input:
@@ -216,8 +216,11 @@ rule cleanup:
         rm sleuthReport.txt
         rm cdsReport.txt
         rm -r blast_out
+        rm *.sam
         '''
 #to do:
+    #ask Dr Wheeler: 
+        #do we build the refseq database for BLAST? or all sequences in that family?
+        #should we clear extra files made during the pipeline after we run it? or is it ok to leave them?
     #write comments
     #write README file/documentation
-    #run with full sample files and SAVE REPORT
