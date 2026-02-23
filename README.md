@@ -1,5 +1,5 @@
 # COMP 483 Pipeline Project
-This pipeline was developed to analyze transcriptomic data of Human cytomegalovirus from two participants at 2 and 6 days post-infection. It integrates output from a variety of tools, including kallisto, sleuth, Bowtie2, SPAdes, and NCBI BLAST/datasets. Links for information on how to download these dependencies are included under "Required Tools". 
+This pipeline was developed to analyze transcriptomic data of Human cytomegalovirus from two participants at 2 and 6 days post-infection. It integrates output from a variety of tools, including kallisto, sleuth, Bowtie2, SPAdes, and NCBI BLAST/datasets. The final report file, named PipelineReport.txt includes information on the number of CDs in the reference genome, transcripts expressed in significantly different amounts between 2 and 6 days-post-infection, the number of paired-end reads before and after mapping to the reference, and top 5 BLAST hits of each assembled viral genome. Links for information on how to download these dependencies are included under "Required Tools". 
 
 The "sample_data" directory in this repo includes short sample data from the 4 transcriptomic datasets to test if the pipeline is working. Information on how this sample data was downloaded as well as how to run the pipeline is included in the sections "Data" and "Running on Sample Data", respectively.
 
