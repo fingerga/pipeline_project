@@ -1,5 +1,5 @@
 # COMP 483 Pipeline Project
-This pipeline was developed to analyze transcriptomic data of Human cytomegalovirus from two participants at 2 and 6 days post-infection. It integrates output from a variety of tools, including kallisto, sleuth, Bowtie2, SPAdes, and NCBI BLAST/datasets. The final report file, named PipelineReport.txt includes information on the number of CDs in the reference genome, transcripts expressed in significantly different amounts between 2 and 6 days-post-infection, the number of paired-end reads before and after mapping to the reference, and top 5 BLAST hits of each assembled viral genome. Links for information on how to download these dependencies are included under "Required Tools". 
+This pipeline was developed to analyze transcriptomic data of Human cytomegalovirus from two participants at 2 and 6 days post-infection. It integrates output from a variety of tools, including kallisto, sleuth, Bowtie2, SPAdes, and NCBI BLAST/datasets. The final report file, named PipelineReport.txt, includes information on the number of CDs in the reference genome, transcripts expressed in significantly different amounts between 2 and 6 days-post-infection, the number of paired-end reads before and after mapping to the reference, and top 5 BLAST hits of each assembled viral genome. Links for information on how to download these dependencies are included under "Required Tools". 
 
 The "sample_data" directory in this repo includes short sample data from the 4 transcriptomic datasets to test if the pipeline is working. Information on how this sample data was downloaded as well as how to run the pipeline is included in the sections "Data" and "Running on Sample Data", respectively.
 
@@ -30,12 +30,12 @@ The full set of reads was downloaded from NCBI using the following command for e
 These reads can also be downloaded using wget:
 
     wget https://sra-pub-run-odp.s3.amazonaws.com/sra/<accession>/<accession>
-These commands were repeated for each sample, changing \<accession\> out for every SRA accession number.
+These commands were repeated for each sample, changing \<accession\> for every SRA accession number.
 
 The full set of these reads were used to generate the Finger_PipelineReport.txt file included in the repo.
 
-### Generating Sample Data
-To generate the shorter sample input data files, the first 10,000 reads from each sample were extracted using the following command:
+### Generating Sample Data (not required)
+The output from this step is included in the "sample_data" directory. For transparency, to generate the shorter sample input data files, the first 10,000 reads from each sample were extracted using the following command:
 
     head -n 40000 \<sample\>.fastq \> shortened_\<sample\>.fastq
 This command was repeated for each sample, changing \<sample\> out for every SRA accession number.
