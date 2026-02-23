@@ -17,9 +17,15 @@ The "sample_data" directory in this repo includes short sample data from the 4 t
 
 ## Data
 ### Full Datasets
-Sample data is the first 10,000 reads from the following 4 SRA samples: SRR5660030, SRR5660033,SRR5660044, and SRR5660045. The full set of reads was downloaded from NCBI using the following command for each sample:
+Sample data is the first 10,000 reads from the following 4 SRA samples: 
+* SRR5660030 (Donor 1, 2dpi) 
+* SRR5660033 (Donor 1, 6dpi)
+* SRR5660044 (Donor 3, 2dpi)
+* SRR5660045 (Donor 3, 6dpi)
 
-    fasterq-dump \<accession\>
+The full set of reads was downloaded from NCBI using the following command for each sample:
+
+    fasterq-dump <accession>
 
 These reads can also be downloaded using wget:
 
