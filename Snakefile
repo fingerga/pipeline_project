@@ -63,7 +63,6 @@ rule kallisto_on_reads:
         quant_reads = directory("quant_reads/{sample}")
     shell:
         # specifying 2 threads so it runs a bit faster
-        # QUESTION: is 10 bootstraps ok? or more?
         '''
         kallisto quant -i {input.ref_index} -o {output.quant_reads} -b 10 -t 2 {input.r1} {input.r2}
         '''
@@ -158,7 +157,6 @@ rule fetch_blast:
     output:
         outfile_blast= "ncbi_dataset_blast.zip"
     shell:
-        # QUESTION: include --refseq for only refseq sequences? or all?
         "datasets download virus genome taxon betaherpesvirinae --include genome --filename {output.outfile_blast}"
 
 rule unzip_blast:
