@@ -35,7 +35,9 @@ To generate the shorter sample input data files, the first 10,000 reads from eac
 This command was repeated for each sample, changing \<sample\> out for every SRA accession number.
 ## Running on Sample Data
 ### Clone repository
-The file "Snakefile" and all other scripts are correctly formatted to run on the provided sample data with one command. First, clone the repo using:
+The file "Snakefile" and all other scripts are correctly formatted to run on the provided sample data with one command. 
+
+First, clone the repo using:
 
     git clone https://github.com/fingerga/pipeline_project.git
 
