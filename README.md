@@ -42,7 +42,7 @@ This command was repeated for each sample, changing \<sample\> out for every SRA
 ## Running on Sample Data
 The file "Snakefile" and all other scripts are correctly formatted to run on the provided sample data with one command. 
 ### Clone repository
-First, clone the repo using:
+First, cd into your desired directory and clone the repo using:
 
     git clone https://github.com/fingerga/pipeline_project.git
 
