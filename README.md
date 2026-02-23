@@ -1,7 +1,7 @@
 # COMP 483 Pipeline Project
 This pipeline was developed to analyze transcriptomic data of Human cytomegalovirus from two participants at 2 and 6 days post-infection. It integrates output from a variety of tools, including kallisto, sleuth, Bowtie2, SPAdes, and NCBI BLAST/datasets. Links for information on how to download these dependencies are included under "Required Tools". 
 
-The "sample_data" directory in this repo includes short sample data from the 4 transcriptomic datasets to test if the pipeline is working. Information on how this sample data was downloaded as well as how to run the pipline is included in the sections "Data" and "Running on Sample Data", respectively.
+The "sample_data" directory in this repo includes short sample data from the 4 transcriptomic datasets to test if the pipeline is working. Information on how this sample data was downloaded as well as how to run the pipeline is included in the sections "Data" and "Running on Sample Data", respectively.
 
 ### Required Tools
 * Python version 3.12.3 
@@ -30,7 +30,7 @@ The full set of reads was downloaded from NCBI using the following command for e
 These reads can also be downloaded using wget:
 
     wget https://sra-pub-run-odp.s3.amazonaws.com/sra/<accession>/<accession>
-These commands were repeated for each sample, changing \<sample\> out for every SRA accession number.
+These commands were repeated for each sample, changing \<accession\> out for every SRA accession number.
 
 The full set of these reads were used to generate the Finger_PipelineReport.txt file included in the repo.
 
