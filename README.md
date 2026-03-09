@@ -37,7 +37,7 @@ The full set of these reads were used to generate the Finger_PipelineReport.txt 
 ### Generating Sample Data (not required)
 The output from this step is included in the "sample_data" directory. For transparency, to generate the shorter sample input data files, the first 10,000 reads from each sample were extracted using the following command:
 
-    head -n 40000 \<sample\>.fastq \> shortened_\<sample\>.fastq
+    head -n 40000 <sample>.fastq > shortened_<sample>.fastq
 This command was repeated for each sample, changing \<sample\> out for every SRA accession number.
 ## Running on Sample Data
 The file "Snakefile" and all other scripts are correctly formatted to run on the provided sample data with one command. 
